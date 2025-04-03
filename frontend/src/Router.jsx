@@ -25,7 +25,7 @@ import DescribeKeyringPage from './pages/sender/DescribeKeyringPage';
 import FontSettingPage from './pages/sender/FontSettingPage';
 import HomePage from './pages/sender/Homepage';
 import KeyringSettingPage from './pages/sender/KeyringSettingPage';
-import LetterDetailPage from './pages/sender/LetterDetailPAge';
+import LetterDetailPage from './pages/sender/LetterDetailPage';
 import LetterPreviewPage from './pages/sender/LetterPreviewPage';
 import LetterWritingPage from './pages/sender/LetterWritingPage';
 import LoginPage from './pages/sender/LoginPage';
