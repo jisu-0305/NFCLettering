@@ -14,7 +14,7 @@ const FilmTemplateEditor = ({ images }) => {
             <StImageSlider>
               <StSlide>
                 {images.map((src, idx) => (
-                  <StPhoto key={`orig-${idx}`} src={src} alt={`film-${idx}`} />
+                  <StPhoto key={`orig-${idx}`} src={src?.url} alt={`film-${idx}`} />
                 ))}
               </StSlide>
             </StImageSlider>
