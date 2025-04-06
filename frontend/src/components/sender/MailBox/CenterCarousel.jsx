@@ -26,7 +26,7 @@ const images = {
   Opened3,
 };
 
-const CenterCarousel = () => {
+const CenterCarousel = ({ selected }) => {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0);
   const [openedIndices, setOpenedIndices] = useState([]);
@@ -38,7 +38,7 @@ const CenterCarousel = () => {
 
   const getSenderMailbox = async (currentPage) => {
     setLoading(true);
-    const response = await getSenderMessages(currentPage);
+    const response = await getSenderMessages(currentPage, selected);
     const { senderMessageSummaryList } = response || {};
 
     if (senderMessageSummaryList) {
@@ -76,10 +76,18 @@ const CenterCarousel = () => {
   };
 
   useEffect(() => {
-    if (!initialLoaded) {
-      getSenderMailbox(0);
-    }
-  }, [initialLoaded]);
+    const resetAndFetch = async () => {
+      setMessages([]);
+      setPage(0);
+      setHasMore(true);
+      setOpenedIndices([]);
+      setInitialLoaded(true);
+
+      await getSenderMailbox(0);
+    };
+
+    resetAndFetch();
+  }, [selected]);
 
   const getAlignType = (idx, activeIdx) => {
     const diff = idx - activeIdx;

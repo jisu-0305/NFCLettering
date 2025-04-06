@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 
+import { getFilterInfo } from '../../../apis/mailbox';
 import Header from '../../common/Header';
 import CenterCarousel from './CenterCarousel';
 
 const SenderMailBox = () => {
-  const dears = ['ALL', '예슬', '바나나', '바보멍청이', '하람쥐', '효승'];
+  const [dearList, setDearList] = useState(null);
   const [selectedDear, setSelectedDear] = useState('ALL');
+
+  const fetchFilterList = async () => {
+    const res = await getFilterInfo();
+    const { keyringFilterResponse } = res || {};
+
+    if (keyringFilterResponse) {
+      const allButton = { keyringId: 'ALL', nfcName: 'ALL' };
+      setDearList([allButton, ...keyringFilterResponse]);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilterList();
+  }, []);
 
   return (
     <>
@@ -15,17 +30,22 @@ const SenderMailBox = () => {
         <Header headerName="보낸 편지함" />
         <StContentWrapper>
           <FilterOptions>
-            {dears.map((dear, id) => (
-              <FilterButton
-                key={id}
-                $isSelected={selectedDear === dear}
-                onClick={() => setSelectedDear(dear)}
-              >
-                {dear}
-              </FilterButton>
-            ))}
+            {dearList &&
+              dearList.map((dear) => {
+                const { keyringId, nfcName } = dear;
+
+                return (
+                  <FilterButton
+                    key={keyringId}
+                    $isSelected={selectedDear === keyringId}
+                    onClick={() => setSelectedDear(keyringId)}
+                  >
+                    {nfcName}
+                  </FilterButton>
+                );
+              })}
           </FilterOptions>
-          <CenterCarousel />
+          <CenterCarousel selected={selectedDear} />
         </StContentWrapper>
       </StListWrapper>
     </>
