@@ -29,7 +29,7 @@ export default ImageSlider;
 
 const SliderWrapper = styled.div`
   position: fixed;
-  bottom: -7rem;
+  bottom: 0;
   display: flex;
   overflow-x: auto;
   gap: 0.75rem;

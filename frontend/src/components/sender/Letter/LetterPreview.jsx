@@ -18,6 +18,7 @@ import Header from '../../common/Header';
 import AiButton from './AiButton';
 import AiEnhanceModal from './AiEnhanceModal';
 import AiRefineModal from './AiRefineModal';
+import ImageSlider from './ImageSlider';
 import LetterEditor from './LetterEditor';
 
 const LetterPreview = () => {
@@ -229,7 +230,7 @@ const StLetterPreview = styled.div`
 const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   box-sizing: border-box;
   padding: 8rem 3rem;
 `;
