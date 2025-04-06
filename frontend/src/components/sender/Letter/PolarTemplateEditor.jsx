@@ -5,8 +5,13 @@ import PolarImg1 from '../../../assets/images/letter/polar1.png';
 import PolarImg2 from '../../../assets/images/letter/polar2.png';
 
 const PolarTemplateEditor = ({ images }) => {
-  const img1 = images[0];
-  const img2 = images[1];
+  if (!images?.[0]?.url || !images?.[1]?.url) {
+    console.warn('🚨 PolarTemplateEditor - 이미지 누락:', images);
+    return null;
+  }
+
+  const img1 = images[0].url;
+  const img2 = images[1].url;
 
   return (
     <StWrapper>

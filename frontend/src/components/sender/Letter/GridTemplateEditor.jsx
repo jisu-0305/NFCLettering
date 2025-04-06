@@ -8,7 +8,7 @@ const GridTemplateEditor = ({ images }) => {
       <StGrid>
         {images.map((src, idx) => (
           <StPhotoWrapper key={idx}>
-            <StPhoto src={src} alt={`photo-${idx}`} />
+            <StPhoto src={src?.url} alt={`photo-${idx}`} />
           </StPhotoWrapper>
         ))}
       </StGrid>

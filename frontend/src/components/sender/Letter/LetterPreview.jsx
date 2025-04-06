@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Slider from 'react-slick';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -13,7 +13,7 @@ import LetterImg4 from '/src/assets/images/letter/letter4.png';
 import { getFontStyle } from '/src/util/getFont';
 
 import { IcArrowLeft, IcArrowRight2 } from '../../../assets/icons';
-import { LetterImageList, LetterTextList, RedisMessageKey } from '../../../recoil/atom';
+import { LetterImageList, LetterText, LetterTextList, RedisMessageKey } from '../../../recoil/atom';
 import Header from '../../common/Header';
 import AiButton from './AiButton';
 import AiEnhanceModal from './AiEnhanceModal';
@@ -26,6 +26,7 @@ const LetterPreview = () => {
   const segmentedText = location.state?.segmentedText;
 
   const localImageList = useRecoilValue(LetterImageList);
+  const localTextList = useRecoilValue(LetterText);
 
   const [imageList, setImageList] = useState([]);
   const [textList, setTextList] = useState([]);
@@ -48,8 +49,6 @@ const LetterPreview = () => {
     { template: 'end', imageCount: 1, textCount: 0, background: null },
   ];
 
-  let imageIndex = 0;
-  let textIndex = 0;
   const sliderRef = useRef(null);
 
   const settings = {
@@ -64,17 +63,21 @@ const LetterPreview = () => {
     fade: true,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
-    beforeChange: (oldIndex, newIndex) => {
-      setCurrentSlide(newIndex);
-    },
+    beforeChange: (oldIndex, newIndex) => setCurrentSlide(newIndex),
   };
 
   useEffect(() => {
+    console.log(localImageList);
+
     if (localImageList && localImageList.length > 0) {
-      const images = localImageList.map((img) => img.url);
-      setImageList(images);
+      const imagesWithId = addIdToImages(localImageList);
+      setImageList(imagesWithId);
     } else if (postcard?.images?.length > 0) {
-      const images = postcard.images.map((img) => `${IMAGE_BASE_URL}${img.filename}`);
+      const images = postcard.images.map((img, idx) => ({
+        file: null,
+        url: `${IMAGE_BASE_URL}${img.filename}`,
+        id: `${img.filename}-${idx}`,
+      }));
       setImageList(images);
     }
 
@@ -88,9 +91,35 @@ const LetterPreview = () => {
       const { font } = await getUserFont();
       setUserFont(getFontStyle(font));
     };
-
     fetchFont();
   }, []);
+
+  const addIdToImages = (images) =>
+    images.map((img, index) => ({
+      ...img,
+      id: `${img.url}-${index}`,
+    }));
+
+  const contents = useMemo(() => {
+    let imageIndex = 0;
+    let textIndex = 0;
+
+    return contentConfig.map(({ template, imageCount, textCount, background }) => {
+      const images = imageList.slice(imageIndex, imageIndex + imageCount);
+      const textStartIndex = textIndex;
+
+      imageIndex += imageCount;
+      textIndex += textCount;
+
+      return {
+        template,
+        images, // 배열로 그대로 넘김
+        textStartIndex,
+        textCount,
+        background,
+      };
+    });
+  }, [imageList, textList]);
 
   const handleTextChange = (index, value) => {
     const updated = [...textList];
@@ -98,23 +127,6 @@ const LetterPreview = () => {
     setTextList(updated);
   };
 
-  const contents = contentConfig.map(({ template, imageCount, textCount, background }) => {
-    const images = imageList.slice(imageIndex, imageIndex + imageCount);
-    const textStartIndex = textIndex;
-
-    imageIndex += imageCount;
-    textIndex += textCount;
-
-    return {
-      template,
-      images: imageCount === 1 ? images[0] : images,
-      textStartIndex,
-      textCount,
-      background,
-    };
-  });
-
-  // AI
   const handleUseRefineText = async (suggestionList) => {
     const updated = [...textList];
     const { textStartIndex, textCount } = contents[currentSlide];
@@ -123,59 +135,14 @@ const LetterPreview = () => {
     for (let i = 0; i < textCount; i++) {
       updated[textStartIndex + i] = slicedSuggestions[i] || '';
     }
-
-    console.log('[🔁 업데이트될 텍스트 리스트]', updated);
     setTextList(updated);
     setLetterTextList(updated);
     setActiveModal(null);
-
-    // if (redisKey) {
-    //   const joinedMessage = updated.join('\n\n');
-    //   await updateRedisMessage(redisKey, joinedMessage);
-    // }
   };
-
-  const closeModal = () => {
-    setActiveModal(null);
-  };
-
-  useEffect(() => {
-    const fetchAiSuggestions = async () => {
-      if (!['edit', 'add'].includes(activeModal)) return;
-
-      const { textStartIndex, textCount } = contents[currentSlide];
-      const slideTexts = textList.slice(textStartIndex, textStartIndex + textCount);
-
-      const filenames = getFilenamesFromPostcard(currentSlide);
-
-      console.log('[🖼️ AI 요청용 이미지 파일명]', filenames);
-      console.log('[📝 슬라이드 텍스트]', slideTexts);
-
-      if (!filenames || filenames.length === 0) return;
-
-      setIsRefining(true);
-
-      if (activeModal === 'edit') {
-        const result = await refineWithImage({ slideTexts, filenames });
-        if (Array.isArray(result)) {
-          setRefineSuggestions(result);
-        }
-      }
-
-      // if (activeModal === 'add') {
-      //   const result = await enhanceWithImage({ text: slideText, filenames });
-      //   if (result) setEnhanceTips(result);
-      // }
-
-      setIsRefining(false);
-    };
-
-    fetchAiSuggestions();
-  }, [activeModal, currentSlide]);
 
   const getFilenamesFromPostcard = (slideIndex) => {
     const imageIndexes = computeImageIndexesPerSlide()[slideIndex];
-    return imageIndexes.map((idx) => postcard?.images?.[idx]?.filename).filter(Boolean); // undefined 제거
+    return imageIndexes.map((idx) => postcard?.images?.[idx]?.filename).filter(Boolean);
   };
 
   const computeImageIndexesPerSlide = () => {
@@ -188,9 +155,30 @@ const LetterPreview = () => {
       map.push(indexes);
       imageIndex += imageCount;
     }
-
     return map;
   };
+
+  useEffect(() => {
+    const fetchAiSuggestions = async () => {
+      if (!['edit', 'add'].includes(activeModal)) return;
+
+      const { textStartIndex, textCount } = contents[currentSlide];
+      const slideTexts = textList.slice(textStartIndex, textStartIndex + textCount);
+      const filenames = getFilenamesFromPostcard(currentSlide);
+
+      if (!filenames || filenames.length === 0) return;
+
+      setIsRefining(true);
+
+      if (activeModal === 'edit') {
+        const result = await refineWithImage({ slideTexts, filenames });
+        if (Array.isArray(result)) setRefineSuggestions(result);
+      }
+
+      setIsRefining(false);
+    };
+    fetchAiSuggestions();
+  }, [activeModal, currentSlide]);
 
   return (
     <StLetterPreview>
@@ -201,7 +189,8 @@ const LetterPreview = () => {
             <LetterEditor
               key={id}
               template={item.template}
-              images={item.images}
+              images={imageList} // 전체 이미지
+              usedImages={item.images} // 현재 페이지에서 사용하는 이미지들
               background={item.background}
               textStartIndex={item.textStartIndex}
               textCount={item.textCount}
@@ -214,20 +203,12 @@ const LetterPreview = () => {
       </ContentWrapper>
 
       {currentSlide !== contents.length - 1 && (
-        <AiButton
-          onOpenModal={(type) => {
-            setActiveModal(type);
-          }}
-        />
+        <AiButton onOpenModal={(type) => setActiveModal(type)} />
       )}
 
-      {/* 모달 */}
-      {/* {activeModal === 'add' && (
-        <AiEnhanceModal onClose={closeModal} font={userFont} tips={enhanceTips} />
-      )} */}
       {activeModal === 'edit' && (
         <AiRefineModal
-          onClose={closeModal}
+          onClose={() => setActiveModal(null)}
           font={userFont}
           suggestions={refineSuggestions}
           onUse={handleUseRefineText}
@@ -258,39 +239,21 @@ const StyledSlider = styled(Slider)`
 
   .slick-list {
     overflow: hidden;
-    height: 100%;
+    /* height: 100%; */
+    height: 55rem;
   }
-
   .slick-track {
     display: flex;
     align-items: center;
     height: 100%;
   }
-
   .slick-slide {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
   }
 `;
-
-const NextArrow = ({ onClick, currentSlide, slideCount }) => {
-  if (currentSlide === slideCount - 1) return null;
-  return (
-    <ArrowRight onClick={onClick}>
-      <IcArrowRight2 />
-    </ArrowRight>
-  );
-};
-
-const PrevArrow = ({ onClick, currentSlide }) => {
-  if (currentSlide === 0) return null;
-  return (
-    <ArrowLeft onClick={onClick}>
-      <IcArrowLeft />
-    </ArrowLeft>
-  );
-};
 
 const ArrowBase = styled.div`
   position: absolute;
@@ -313,3 +276,21 @@ const ArrowLeft = styled(ArrowBase)`
 const ArrowRight = styled(ArrowBase)`
   right: -2rem;
 `;
+
+const NextArrow = ({ onClick, currentSlide, slideCount }) => {
+  if (currentSlide === slideCount - 1) return null;
+  return (
+    <ArrowRight onClick={onClick}>
+      <IcArrowRight2 />
+    </ArrowRight>
+  );
+};
+
+const PrevArrow = ({ onClick, currentSlide }) => {
+  if (currentSlide === 0) return null;
+  return (
+    <ArrowLeft onClick={onClick}>
+      <IcArrowLeft />
+    </ArrowLeft>
+  );
+};

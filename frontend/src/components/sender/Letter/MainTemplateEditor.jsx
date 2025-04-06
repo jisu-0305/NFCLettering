@@ -9,7 +9,7 @@ const MainTemplateEditor = ({ images }) => {
 
   return (
     <StWrapper>
-      <StLetterImage src={mainImg} alt="편지 사진" />
+      <StLetterImage src={mainImg?.url} alt="편지 사진" />
       <StStampImage src={StampImg} alt="스탬프" />
       <StTextImage src={LetteringImg} alt="레터링" />
     </StWrapper>

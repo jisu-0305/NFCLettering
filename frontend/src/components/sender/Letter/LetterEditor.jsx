@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -6,13 +8,17 @@ import LongButton from '../../common/button/LongButton';
 import EndTemplateEditor from './EndTemplateEditor';
 import FilmTemplateEditor from './FilmTemplateEditor';
 import GridTemplateEditor from './GridTemplateEditor';
+import ImageSlider from './ImageSlider';
 import MainTemplateEditor from './MainTemplateEditor';
 import PolarTemplateEditor from './PolarTemplateEditor';
 import TextAreaEditor from './TextAreaEditor';
 
+const NUM_SLOTS = 4;
+
 const LetterEditor = ({
   template,
-  images,
+  images, // 전체 이미지 배열
+  usedImages, // 현재 페이지에서 사용 중인 이미지들
   background,
   textList,
   textStartIndex = 0,
@@ -20,6 +26,41 @@ const LetterEditor = ({
   font,
 }) => {
   const navigate = useNavigate();
+
+  const [imageSlots, setImageSlots] = useState(
+    Array(NUM_SLOTS)
+      .fill(null)
+      .map((_, i) => usedImages?.[i] || null),
+  );
+
+  const handleDropImage = (slotIndex, image) => {
+    const newSlots = [...imageSlots];
+    newSlots[slotIndex] = image;
+    setImageSlots(newSlots);
+  };
+
+  const handleRemoveImage = (slotIndex) => {
+    const newSlots = [...imageSlots];
+    newSlots[slotIndex] = null;
+    setImageSlots(newSlots);
+  };
+
+  const usedImageIds = useMemo(
+    () =>
+      new Set(
+        imageSlots
+          .filter(Boolean)
+          .map((img) => img?.id)
+          .filter(Boolean),
+      ),
+    [imageSlots],
+  );
+
+  const availableImages = useMemo(
+    () => images.filter((img) => !usedImageIds.has(img.id)),
+    [images, usedImageIds],
+  );
+
   const renderTextArea = (index) => {
     const globalIndex = textStartIndex + index;
     const value = textList?.[globalIndex] || '';
@@ -35,43 +76,62 @@ const LetterEditor = ({
   };
 
   return (
-    <StLetterWrapper $background={background}>
-      <StContentWrapper>
-        {template === 'main' && (
-          <>
-            <MainTemplateEditor images={images} />
-            {renderTextArea(0)}
-          </>
-        )}
-        {template === 'film' && (
-          <>
-            {renderTextArea(0)}
-            <FilmTemplateEditor images={images} />
-          </>
-        )}
-        {template === 'polar' && (
-          <>
-            <PolarTemplateEditor images={images} />
-            {renderTextArea(0)}
-          </>
-        )}
-        {template === 'card' && (
-          <>
-            {renderTextArea(0)}
-            <GridTemplateEditor images={images} />
-            {renderTextArea(1)}
-          </>
-        )}
-        {template === 'end' && (
-          <>
-            <StEndText>편지 작성을 다 완료하셨나요?</StEndText>
-            <StEndText>한번 보낸 편지는 수정할 수 없어요</StEndText>
-            <EndTemplateEditor images={images} />
-            <LongButton onClick={() => navigate('/selectdear')} btnName="편지 전송하기" />
-          </>
-        )}
-      </StContentWrapper>
-    </StLetterWrapper>
+    <DndProvider backend={HTML5Backend}>
+      <StLetterWrapper $background={background}>
+        <StContentWrapper>
+          {template === 'main' && (
+            <>
+              <MainTemplateEditor
+                images={imageSlots}
+                onDropImage={handleDropImage}
+                onRemoveImage={handleRemoveImage}
+              />
+              {renderTextArea(0)}
+            </>
+          )}
+          {template === 'film' && (
+            <>
+              {renderTextArea(0)}
+              <FilmTemplateEditor
+                images={imageSlots}
+                onDropImage={handleDropImage}
+                onRemoveImage={handleRemoveImage}
+              />
+            </>
+          )}
+          {template === 'polar' && (
+            <>
+              <PolarTemplateEditor
+                images={imageSlots}
+                onDropImage={handleDropImage}
+                onRemoveImage={handleRemoveImage}
+              />
+              {renderTextArea(0)}
+            </>
+          )}
+          {template === 'card' && (
+            <>
+              {renderTextArea(0)}
+              <GridTemplateEditor
+                images={imageSlots}
+                onDropImage={handleDropImage}
+                onRemoveImage={handleRemoveImage}
+              />
+              {renderTextArea(1)}
+            </>
+          )}
+          {template === 'end' && (
+            <>
+              <StEndText>편지 작성을 다 완료하셨나요?</StEndText>
+              <StEndText>한번 보낸 편지는 수정할 수 없어요</StEndText>
+              <EndTemplateEditor images={imageSlots} />
+              <LongButton onClick={() => navigate('/selectdear')} btnName="편지 전송하기" />
+            </>
+          )}
+        </StContentWrapper>
+      </StLetterWrapper>
+      {template !== 'end' && <ImageSlider images={availableImages} />}
+    </DndProvider>
   );
 };
 
@@ -82,10 +142,8 @@ const StLetterWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-
   width: 33rem;
   height: 55rem;
-
   background-image: url(${(props) => props.$background});
   background-size: 100% 100%;
   background-position: center;
@@ -99,53 +157,6 @@ const StContentWrapper = styled.div`
   align-items: center;
   width: 70%;
   height: 100%;
-`;
-
-const StLetterTextWrapper = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 22rem;
-  height: 15rem;
-  display: flex;
-  box-sizing: border-box;
-`;
-
-const LetterText = styled.textarea`
-  width: 22rem;
-  height: 12rem;
-
-  word-wrap: break-word;
-  overflow: auto;
-  white-space: normal;
-
-  ${({ theme }) => theme.fonts.Gomsin2};
-  background-color: transparent;
-  border: solid ${({ theme }) => theme.colors.Orange1};
-  border-radius: 0.75rem;
-  outline: none;
-`;
-
-const EditButton = styled.button`
-  position: absolute;
-  bottom: 0;
-  right: 0.5rem;
-  width: 4rem;
-  height: 2rem;
-  background-color: ${({ theme, $isEditing }) =>
-    $isEditing ? theme.colors.MainRed : theme.colors.Orange1};
-  border-radius: 1rem;
-  ${({ theme }) => theme.fonts.Body4};
-  color: ${({ theme }) => theme.colors.White};
-`;
-
-const CharCount = styled.div`
-  position: absolute;
-  bottom: 0.5rem;
-  left: 0.5rem;
-  color: ${({ theme }) => theme.colors.Orange1};
-  ${({ theme }) => theme.fonts.Body4};
 `;
 
 const StEndText = styled.div`
