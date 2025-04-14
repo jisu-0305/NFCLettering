@@ -186,6 +186,7 @@ const SlideComponent = () => {
       {quizData && (
         <ModalWrapper>
           <SecretModal
+            isLanding={false}
             question={quizData.quizQuestion}
             hint={quizData.quizHint || '힌트 없음'}
             correctAnswer={quizData.quizAnswer}

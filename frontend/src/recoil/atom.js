@@ -96,7 +96,18 @@ const KeyringCustomList = atom({
   default: [],
 });
 
+const SelectedFilterState = atom({
+  key: 'SelectedFilterState',
+  default: 0,
+});
+
+const ActiveIndexState = atom({
+  key: 'ActiveIndexState',
+  default: 0,
+});
+
 export {
+  ActiveIndexState,
   KeyringCustomList,
   LetterImageList,
   LetterText,
@@ -106,6 +117,7 @@ export {
   PostcardImageFile,
   PostcardText,
   RedisMessageKey,
+  SelectedFilterState,
   SelectedKeyringId,
   TotalPrice,
   TotalQuantity,

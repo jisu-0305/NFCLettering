@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { IcClose } from '../../../assets/icons';
 
-const ConfirmModal = ({ isOpen, onClose, title, children }) => {
+const ConfirmModal = ({ isLanding, isOpen, onClose, title, children }) => {
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
@@ -15,7 +15,7 @@ const ConfirmModal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <Backdrop onClick={onClose}>
+    <Backdrop onClick={onClose} $isLanding={isLanding}>
       <StModalWrapper onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>
           <IcClose style={{ cursor: 'pointer' }} />
@@ -36,7 +36,7 @@ const Backdrop = styled.div`
   z-index: 999;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: ${({ $isLanding }) => ($isLanding ? 'white' : 'rgba(0, 0, 0, 0.3)')};
   display: flex;
   justify-content: center;
   align-items: center;
