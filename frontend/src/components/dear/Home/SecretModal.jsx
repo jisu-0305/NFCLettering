@@ -90,7 +90,7 @@ const ModalContent = styled.div`
 `;
 
 const LockImage = styled.img`
-  width: 50%;
+  width: 50% !important;
   height: auto;
   margin: 1rem auto;
 `;
