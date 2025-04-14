@@ -6,7 +6,7 @@ import { getHighImage, getQuizInfo, getUnreadMessage } from '/src/apis/dear';
 import { getLetterDetail } from '/src/apis/letter';
 import { getPostcardDetail } from '/src/apis/postcard';
 
-import { getCustomMessage, postDeviceInfo } from '../../../apis/dear';
+import { getCustomMessage } from '../../../apis/dear';
 import OBJViewer from './OBJViewer';
 import SecretModal from './SecretModal';
 
@@ -22,7 +22,6 @@ const Landing = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await postDeviceInfo();
       await fetchCustomMessage();
       await fetchUnreadMessage();
     };
