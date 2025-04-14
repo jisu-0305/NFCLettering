@@ -7,7 +7,14 @@ import LockIcon from '/src/assets/images/sender/SecretOption.png'; // 🔒 자�
 import ConfirmButton from '../../common/button/ConfirmButton';
 import ConfirmModal from '../../common/modal/ConfirmModal';
 
-export default function SecretModal({ question, hint, correctAnswer, onSuccess, onClose }) {
+export default function SecretModal({
+  isLanding,
+  question,
+  hint,
+  correctAnswer,
+  onSuccess,
+  onClose,
+}) {
   const navigate = useNavigate();
   const [userAnswer, setUserAnswer] = useState('');
   const [error, setError] = useState('');
@@ -23,6 +30,7 @@ export default function SecretModal({ question, hint, correctAnswer, onSuccess, 
 
   return (
     <ConfirmModal
+      isLanding={isLanding}
       isOpen={true}
       onClose={onClose}
       title={
@@ -82,7 +90,7 @@ const ModalContent = styled.div`
 `;
 
 const LockImage = styled.img`
-  width: 10rem;
+  width: 50%;
   height: auto;
   margin: 1rem auto;
 `;

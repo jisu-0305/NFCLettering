@@ -34,7 +34,7 @@ const Home = () => {
         <StButtonWrapper>
           <LongButton
             onClick={() => window.open('https://letterring.shop/', '_blank')}
-            btnName="서비스 보러가기"
+            btnName="나도 편지를 쓰고 싶다면?"
           />
         </StButtonWrapper>
       </StPageWrapper>
