@@ -144,6 +144,7 @@ const DeliveryType = () => {
         keyringId: selectedKeyringId,
         sealingWaxId: Number(sealingWaxId),
         conditionType,
+        conditionTime: scheduledAt ? format(scheduledAt, "yyyy-MM-dd'T'HH:mm:ss") : null,
         contents: letterTextList,
       };
 

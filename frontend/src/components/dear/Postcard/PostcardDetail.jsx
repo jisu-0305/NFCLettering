@@ -112,10 +112,10 @@ export default PostcardDetail;
 
 const StbtnWrapper = styled.div`
   padding: 0 2rem;
-  width: 100%;
+  width: 95%;
   display: flex;
   justify-content: center;
-  gap: 3rem;
+  gap: 2rem;
 `;
 
 export const SimpleButton = styled.button`

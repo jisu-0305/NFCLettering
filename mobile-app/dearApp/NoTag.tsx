@@ -53,7 +53,7 @@ const Home = () => {
 
       <View style={styles.buttonWrapper}>
         <TouchableOpacity style={styles.button} onPress={handlePress}>
-          <Text style={styles.buttonText}>서비스 보러가기</Text>
+          <Text style={styles.buttonText}>나도 편지를 쓰고 싶다면?</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>

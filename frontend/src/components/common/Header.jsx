@@ -69,7 +69,7 @@ const StHeaderWrapper = styled.button`
 
   width: 100%;
   max-width: 38rem;
-  padding: 2rem;
+  padding: 4rem 2rem;
 
   color: ${({ theme }) => theme.colors.MainRed};
   ${({ theme }) => theme.fonts.MenuLogo};

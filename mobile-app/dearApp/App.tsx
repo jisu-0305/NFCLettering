@@ -1,8 +1,13 @@
 /* eslint-disable no-void */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useRef, useState} from 'react';
-import {Alert, Platform, PermissionsAndroid} from 'react-native';
-import {StyleSheet, View, Text} from 'react-native';
+import {
+  Alert,
+  Platform,
+  PermissionsAndroid,
+  StatusBar,
+  NativeModules,
+} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import {WebView} from 'react-native-webview';
 import type {WebView as WebViewType} from 'react-native-webview';
@@ -11,6 +16,7 @@ import {Linking} from 'react-native';
 import axios from 'axios';
 import RNFS from 'react-native-fs';
 import NoTag from './NoTag';
+import Forbidden from './Forbidden';
 
 // NFC 초기화
 NfcManager.start();
@@ -42,6 +48,7 @@ const App = () => {
       try {
         if (Platform.OS === 'android') {
           await PermissionsAndroid.request('android.permission.NFC' as any);
+          NativeModules?.FullScreenModule?.enableFullScreen?.();
         }
 
         // ✅ 최초 실행 시 딥링크 처리
@@ -78,7 +85,7 @@ const App = () => {
 
   const handleDeepLink = async ({url}: {url: string}) => {
     try {
-      const match = url.match(/^yourapp:\/\/nfc\/([^?]+)(\?.*)?$/);
+      const match = url.match(/^lettering:\/\/nfc\/([^?]+)(\?.*)?$/);
       const keyringId = match?.[1] ?? '';
       const queryString = match?.[2] ?? '';
 
@@ -212,15 +219,7 @@ const App = () => {
   });
 
   if (isForbidden) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.forbiddenEmoji}>🚫</Text>
-        <Text style={styles.forbiddenTitle}>접근이 제한된 키링이에요</Text>
-        <Text style={styles.forbiddenSubtitle}>
-          유효하지 않거나 권한이 없는 키링입니다.
-        </Text>
-      </View>
-    );
+    return <Forbidden />;
   }
 
   if (!data || (!isReady && !isForbidden)) {
@@ -247,89 +246,67 @@ const App = () => {
   console.log(data.url);
 
   return (
-    <WebView
-      ref={webViewRef}
-      source={{uri: data?.url ?? ''}}
-      sharedCookiesEnabled={true}
-      javaScriptEnabled
-      originWhitelist={['*']}
-      style={{flex: 1}}
-      onMessage={async event => {
-        console.log('📨 받은 메시지:', event.nativeEvent.data);
+    <>
+      <StatusBar hidden={true} />
+      <WebView
+        ref={webViewRef}
+        source={{uri: data?.url ?? ''}}
+        sharedCookiesEnabled={true}
+        javaScriptEnabled
+        originWhitelist={['*']}
+        style={{flex: 1}}
+        onMessage={async event => {
+          console.log('📨 받은 메시지:', event.nativeEvent.data);
 
-        const base64 = event.nativeEvent.data;
+          const base64 = event.nativeEvent.data;
 
-        if (!base64?.startsWith('data:image')) {
-          console.warn('📛 예상치 못한 메시지:', base64);
-          return;
-        }
-
-        if (Platform.OS === 'android') {
-          try {
-            let granted;
-
-            if (Platform.Version >= 33) {
-              // Android 13 이상
-              granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-              );
-            } else {
-              // Android 12 이하
-              granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-              );
-            }
-
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-              Alert.alert('저장 권한이 필요합니다.');
-            } else {
-              console.log('✅ 권한 허용됨');
-            }
-          } catch (err) {
-            console.warn(err);
+          if (!base64?.startsWith('data:image')) {
+            console.warn('📛 예상치 못한 메시지:', base64);
+            return;
           }
-        }
 
-        const base64Data = base64.replace(/^data:image\/png;base64,/, '');
-        const filename = `letterring_postcard_${Date.now()}.png`;
-        const path = `${RNFS.DownloadDirectoryPath}/${filename}`;
+          if (Platform.OS === 'android') {
+            try {
+              let granted;
 
-        try {
-          await RNFS.writeFile(path, base64Data, 'base64');
-          Alert.alert('내 파일 > Download에 사진이 저장되었습니다!');
-        } catch (err) {
-          console.error('❌ 저장 실패:', err);
-          Alert.alert('파일을 저장할 수 없습니다.');
-        }
-      }}
-    />
+              if (Platform.Version >= 33) {
+                // Android 13 이상
+                granted = await PermissionsAndroid.request(
+                  PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+                );
+              } else {
+                // Android 12 이하
+                granted = await PermissionsAndroid.request(
+                  PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                );
+              }
+
+              if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                Alert.alert('저장 권한이 필요합니다.');
+              } else {
+                console.log('✅ 권한 허용됨');
+              }
+            } catch (err) {
+              console.warn(err);
+            }
+          }
+
+          const base64Data = base64.replace(/^data:image\/png;base64,/, '');
+          const filename = `letterring_postcard_${Date.now()}.png`;
+          const path = `${RNFS.DownloadDirectoryPath}/${filename}`;
+
+          try {
+            await RNFS.writeFile(path, base64Data, 'base64');
+            Alert.alert('📷 갤러리에 엽서를 저장했어요!');
+          } catch (err) {
+            console.error('❌ 저장 실패:', err);
+            Alert.alert('파일을 저장할 수 없습니다.');
+          }
+        }}
+      />
+    </>
     // </View>
   );
 };
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
-  },
-  forbiddenEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  forbiddenTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  forbiddenSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-  },
-});
 
 export default App;
