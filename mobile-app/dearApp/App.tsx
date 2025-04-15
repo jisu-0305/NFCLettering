@@ -297,7 +297,7 @@ const App = () => {
 
           try {
             await RNFS.writeFile(path, base64Data, 'base64');
-            Alert.alert('내 파일 > Download에 사진이 저장되었습니다!');
+            Alert.alert('📷 갤러리에 엽서를 저장했어요!');
           } catch (err) {
             console.error('❌ 저장 실패:', err);
             Alert.alert('파일을 저장할 수 없습니다.');

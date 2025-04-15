@@ -30,7 +30,7 @@ const StWrapper = styled.div`
 
 const StConfetti = styled.img`
   position: absolute;
-  top: -5.3rem;
+  top: -7.2rem;
   left: -2.8rem;
   width: 27.5rem;
   z-index: 1;
