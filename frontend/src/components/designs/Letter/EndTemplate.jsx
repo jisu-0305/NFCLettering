@@ -97,7 +97,7 @@ const StLetterImage = styled.img`
 const StEnvelope = styled.img`
   position: absolute;
   width: 20.1rem;
-  top: -1.9rem;
-  left: 2.16rem;
+  top: -2.2rem;
+  left: 1.4rem;
   z-index: 5;
 `;

@@ -66,7 +66,7 @@ const LetterContent = ({
   };
 
   return (
-    <StLetterWrapper $background={background}>
+    <StLetterWrapper $background={background} $templateType={template}>
       <StContentWrapper>
         {template === 'main' && (
           <>
@@ -142,11 +142,11 @@ const LetterContent = ({
 export default LetterContent;
 
 const StBtnWrapper = styled.div`
-  width: 100%;
+  width: 29rem;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
-  margin: 1rem;
+  margin: 2rem 1rem;
 `;
 
 const StLetterWrapper = styled.div`
@@ -155,8 +155,12 @@ const StLetterWrapper = styled.div`
   justify-content: center;
   align-items: center;
 
-  width: 33rem;
-  height: 55rem;
+  /* width: 33rem;
+  height: 55rem; */
+
+  width: ${({ $templateType }) => ($templateType === 'answer' ? 'auto' : '33rem')};
+  height: ${({ $templateType }) => ($templateType === 'answer' ? '60rem' : '55rem')};
+  padding-top: ${({ $templateType }) => ($templateType === 'answer' ? '7rem' : '0')};
 
   background-image: url(${(props) => props.$background});
   background-size: 100% 100%;
@@ -171,6 +175,8 @@ const StContentWrapper = styled.div`
   align-items: center;
   width: 70%;
   height: 100%;
+
+  /* padding: 0 2rem; */
 `;
 
 const StDearText = styled.div`

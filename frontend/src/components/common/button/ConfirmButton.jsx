@@ -8,6 +8,7 @@ export default ConfirmButton;
 
 const StConfirmButtonWrapper = styled.button`
   width: 100%;
+  min-width: fit-content;
   padding: 1rem 2rem 1rem 2rem;
   border-radius: 1rem;
   background-color: ${({ theme }) => theme.colors.Red2};

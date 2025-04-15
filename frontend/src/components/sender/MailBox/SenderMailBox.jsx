@@ -124,4 +124,6 @@ const FilterButton = styled.button`
 
   border-radius: 1.5rem;
   border: 1.5px solid ${({ theme }) => theme.colors.MainRed};
+
+  z-index: 10;
 `;
