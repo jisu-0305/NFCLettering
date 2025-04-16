@@ -19,7 +19,7 @@ pipeline {
 
           // Jenkinsfile 변경 시 전체 빌드 강제
           if (changedFiles.contains("infra/Jenkinsfile")) {
-            echo "🛠️ Jenkinsfile 변경 감지 → 전체 서비스 재빌드 강제 실행!"
+            echo "🛠️ Jenkinsfile 변경 감지 → 전체 서비스 재빌드 강제 실행"
             env.DEFAULT_CONF_CHANGED = "true"
             env.FRONTEND_CHANGED = "true"
             env.BACKEND_CHANGED = "true"
