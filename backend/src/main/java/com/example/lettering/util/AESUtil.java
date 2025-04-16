@@ -11,7 +11,7 @@ import java.util.Base64;
 public class AESUtil {
 
     @Value("${aes.secret-key}")
-    private String secretKey; // secret.properties 또는 application.yml에서 주입
+    private String secretKey;
 
     private static final String ALGORITHM = "AES";
 
