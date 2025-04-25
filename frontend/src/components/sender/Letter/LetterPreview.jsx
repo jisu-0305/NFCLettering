@@ -86,10 +86,10 @@ const LetterPreview = () => {
     [],
   );
 
-  useEffect(() => {
-    aiSocket.connect(); // 🔌 마운트 시 연결
-    return () => aiSocket.close(); // ❌ 언마운트 시 해제
-  }, []);
+  // useEffect(() => {
+  //   aiSocket.connect(); // 🔌 마운트 시 연결
+  //   return () => aiSocket.close(); // ❌ 언마운트 시 해제
+  // }, []);
 
   useEffect(() => {
     if (redisKey) {
