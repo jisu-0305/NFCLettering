@@ -12,23 +12,23 @@ import LongButton from '../../common/button/LongButton';
 import Header from '../../common/Header';
 
 const Complete = () => {
-  const key = useRecoilValue(RedisMessageKey);
+  // const key = useRecoilValue(RedisMessageKey);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const autoDelete = async () => {
-      try {
-        const result = await deletePostcard(key);
-        console.log(`🗑️ 삭제 성공: ${result.key}`);
-      } catch (error) {
-        console.warn(`삭제 실패: ${error.error || error}`);
-      }
-    };
+  // useEffect(() => {
+  //   const autoDelete = async () => {
+  //     try {
+  //       const result = await deletePostcard(key);
+  //       console.log(`🗑️ 삭제 성공: ${result.key}`);
+  //     } catch (error) {
+  //       console.warn(`삭제 실패: ${error.error || error}`);
+  //     }
+  //   };
 
-    if (key) {
-      autoDelete();
-    }
-  }, [key]);
+  //   if (key) {
+  //     autoDelete();
+  //   }
+  // }, [key]);
 
   return (
     <CompleteWrapper $Background={PaperBackground}>
