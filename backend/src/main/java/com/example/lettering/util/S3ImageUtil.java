@@ -90,7 +90,6 @@ public class S3ImageUtil {
             updatedContentType = "image/jpeg";
         }
 
-        // 허용 확장자 검증 (HEIC/HEIF는 변환 후 .jpg로 저장되므로, 여기서는 .png, .jpg, .jpeg만 허용)
         if (!isAllowedExtension(extension)) {
             throw new ExternalApiException(ExceptionCode.INVALID_IMAGE_FORMAT);
         }
@@ -138,7 +137,7 @@ public class S3ImageUtil {
         String ext = extension.toLowerCase();
         return ext.equals(".png") || ext.equals(".jpg") || ext.equals(".jpeg")
                 || ext.equals(".heic") || ext.equals(".heif")
-                || ext.equals(".gif");
+                || ext.equals(".gif") || ext.equals(".webp");
     }
 
     /**
