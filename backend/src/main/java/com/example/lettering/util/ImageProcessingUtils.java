@@ -41,6 +41,8 @@ public class ImageProcessingUtils {
         String formatName;
         if (lowerContentType.contains("heic") || lowerContentType.contains("heif")) {
             formatName = "jpg"; // HEIC/HEIF는 JPEG로 변환
+        } else if (lowerContentType.contains("webp")) {
+            formatName = "webp";
         } else if (lowerContentType.contains("png")) {
             formatName = "png";
         } else {
