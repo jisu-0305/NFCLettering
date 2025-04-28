@@ -44,7 +44,7 @@ export const getCustomMessage = async () => {
 export const postDeviceInfo = async () => {
   try {
     const res = await client.post('/keyrings/nfc-access', {
-      id: 19,
+      id: 17,
       deviceId: '22eb13c76a1d38d1',
     });
     return res;

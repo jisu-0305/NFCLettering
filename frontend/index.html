@@ -20,8 +20,8 @@
     <meta name="msapplication-TileColor" content="#ffffff" />
 
     <!-- 폰트 설정 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="https://fonts.googleapis.com" />
+    <link rel="preload" href="https://fonts.gstatic.com" crossorigin />
     <!-- pretendard -->
     <link
       rel="stylesheet"
@@ -34,6 +34,28 @@
       href="https://fonts.googleapis.com/css2?family=Alkatra:wght@400..700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="preload"
+      as="font"
+      href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff"
+      type="font/woff"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      as="font"
+      href="https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEduSaeeum_OTFMediumA.woff"
+      type="font/woff"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      as="font"
+      href="https://fastly.jsdelivr.net/gh/projectnoonnu/naverfont_05@1.0/Gomsin.woff"
+      type="font/woff"
+      crossorigin="anonymous"
+    />
+
     <style>
       /* GangwonEduAll */
       @font-face {
@@ -42,6 +64,7 @@
           format('woff');
         font-weight: normal;
         font-style: normal;
+        font-display: block;
       }
       /* GangwonEduSaeeum */
       @font-face {
@@ -50,6 +73,7 @@
           format('woff');
         font-weight: normal;
         font-style: normal;
+        font-display: block;
       }
       /* Gomsin */
       @font-face {
@@ -58,6 +82,7 @@
           format('woff');
         font-weight: normal;
         font-style: normal;
+        font-display: block;
       }
     </style>
 
@@ -65,8 +90,60 @@
     <title>Lettering</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="root" style="opacity: 0; transition: opacity 0.3s ease"></div>
+    <div
+      id="loading-screen"
+      style="
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: sans-serif;
+      "
+    >
+      로딩 중...
+    </div>
+    <!-- <script type="module" src="/src/main.jsx"></script> -->
+    <script>
+      async function waitFontsReady() {
+        if (!document.fonts) return;
+
+        // 1. 원하는 폰트 load
+        await Promise.all([
+          document.fonts.load('1rem GangwonEdu_OTFBoldA'),
+          document.fonts.load('1rem GangwonEduSaeeum_OTFMediumA'),
+          document.fonts.load('1rem Gomsin'),
+          document.fonts.load('1rem Pretendard'),
+        ]);
+
+        // 2. "폰트가 실제로 모두 렌더링 준비 완료됐는지" 다시 체크
+        await document.fonts.ready;
+      }
+
+      async function startReactApp() {
+        const loadingScreen = document.getElementById('loading-screen');
+        const root = document.getElementById('root');
+
+        if (loadingScreen) loadingScreen.style.display = 'none';
+        if (root) root.style.opacity = '1'; // opacity를 바꿔서 "순식간에" 자연스럽게 보여줌
+
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = '/src/main.jsx';
+        document.body.appendChild(script);
+      }
+
+      waitFontsReady()
+        .then(() => {
+          console.log('폰트 로딩과 준비 완료, React 앱 시작');
+          startReactApp();
+        })
+        .catch((err) => {
+          console.error('폰트 로딩 실패:', err);
+          startReactApp();
+        });
+    </script>
     <!-- service-worker 등록 -->
     <script>
       if ('serviceWorker' in navigator) {

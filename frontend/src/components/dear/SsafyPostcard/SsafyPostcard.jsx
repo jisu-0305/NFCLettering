@@ -23,6 +23,15 @@ const Postcard = () => {
   const y = -Math.sin(angle) * distance;
 
   useEffect(() => {
+    const preloadImages = [EnvelopeTopImg, EnvelopeBottomImg, PostcardImg];
+
+    preloadImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  useEffect(() => {
     const fetchPostcard = async () => {
       const data = await getPostcardDetail(messageId);
       setPostcard(data);
