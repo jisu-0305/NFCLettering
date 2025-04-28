@@ -51,24 +51,71 @@ const PostcardWriting = () => {
     if (!file) return;
 
     if (file.size > 4 * 1024 * 1024) {
-      //4MB
       alert('4MB가 넘습니다!');
       event.target.type = '';
       event.target.type = 'file';
       return;
     }
 
+    let finalFile = file;
+
     if (file.name.endsWith('.heic') || file.name.endsWith('.HEIC')) {
-      //heic 이미지 처리
+      // HEIC 이미지 처리
       const newFile = await convertHeicToJpeg(file);
       if (newFile) {
-        setImageFile(newFile);
-        setImage(URL.createObjectURL(newFile));
+        finalFile = newFile;
       }
-    } else {
-      setImageFile(file);
-      setImage(URL.createObjectURL(file));
     }
+
+    // ✅ WebP 변환
+    const webpDataUrl = await convertImageFileToWebP(finalFile);
+
+    if (webpDataUrl) {
+      const webpBlob = dataURLtoBlob(webpDataUrl);
+
+      setImageFile(new File([webpBlob], `letterring_${Date.now()}.webp`, { type: 'image/webp' }));
+      setImage(webpDataUrl);
+    }
+  };
+
+  // 파일을 WebP로 변환하는 유틸
+  const convertImageFileToWebP = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = () => {
+        const img = new Image();
+        img.src = reader.result;
+
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          const webpDataUrl = canvas.toDataURL('image/webp', 0.8); // 80% 품질
+          resolve(webpDataUrl);
+        };
+      };
+    });
+  };
+
+  // Base64를 Blob으로 변환하는 유틸
+  const dataURLtoBlob = (dataurl) => {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new Blob([u8arr], { type: mime });
   };
 
   const triggerFileInput = () => {
@@ -97,7 +144,7 @@ const PostcardWriting = () => {
           >
             <input
               type="file"
-              accept="image/png, image/jpeg, image/heic"
+              accept="image/png, image/jpeg, image/heic, image/webp"
               onChange={handleImageChange}
               style={{ display: 'none' }}
               ref={fileInputRef}
@@ -141,8 +188,9 @@ const StPageWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  /* height: 100%; */
   padding: 2rem;
+  padding-top: 12rem;
 `;
 
 const StContentWrapper = styled.div`
