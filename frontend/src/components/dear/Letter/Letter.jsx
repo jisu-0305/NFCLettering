@@ -32,6 +32,15 @@ const Letter = () => {
   const y = -Math.sin(angle) * distance;
 
   useEffect(() => {
+    const preloadImages = [EnvelopeTopImg, EnvelopeBottomImg, LetterImg, LetteringImg, StampImg];
+
+    preloadImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  useEffect(() => {
     if (!letterData || !ImageData) {
       const fetchLetter = async () => {
         const {
