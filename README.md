@@ -7,7 +7,7 @@
 
 > 배포 링크
 >
-> [**https://letterring.shop/**](https://letterring.shop/)
+> [**https://nfclettering.com/**](https://nfclettering.com/)
 
 [figma](https://www.figma.com/design/MfCRRB3bWLgo4YMorH7M4U/%EC%A1%B8%EC%9E%91_%EB%94%94%EC%9E%90%EC%9D%B8?node-id=438-1940&t=iFzQIb6C351DL0Wr-0)   |
 
